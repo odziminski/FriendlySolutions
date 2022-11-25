@@ -40,8 +40,8 @@ class Parser
         $locationPhone = floatval(preg_replace('/\D+/', '', $this->getData('location_phone')));
 
         $handle = fopen("data.csv", "a");
-        $result = fwrite($handle, implode(',', [$woNumber, $poNumber, $scheduledDate, $customer, $trade, $nte, $storeID,
-            $address['address'], $address['city'], $address['state'], $address['zip'], $locationPhone]));
+        $result = fputcsv($handle, [$woNumber, $poNumber, $scheduledDate, $customer, $trade, $nte, $storeID,
+            $address['address'], $address['city'], $address['state'], $address['zip'], $locationPhone]);
         fclose($handle);
 
         if ($result) {
