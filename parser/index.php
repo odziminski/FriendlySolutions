@@ -18,16 +18,16 @@ class Parser
         return $dom;
     }
 
-    public function getData($id): ?string
+    public function getData($id): string
     {
         $dom = $this->loadHtmlDom('wo_for_parse.html');
         $element = $dom->getElementById($id);
         if ($element) {
-            return $element?->nodeValue;
+            return $element->nodeValue;
         } else return false;
     }
 
-    public function main(): void
+    public function writeToCSV(): void
     {
         $woNumber = $this->getData('wo_number');
         $poNumber = $this->getData('po_number');
@@ -38,7 +38,20 @@ class Parser
         $storeID = $this->getData('location_name');
         $address = $this->getAddressFields($this->getData('location_address'));
         $locationPhone = floatval(preg_replace('/\D+/', '', $this->getData('location_phone')));
+
+        $handle = fopen("data.csv", "a");
+        $result = fwrite($handle, implode(',', [$woNumber, $poNumber, $scheduledDate, $customer, $trade, $nte, $storeID,
+            $address['address'], $address['city'], $address['state'], $address['zip'], $locationPhone]));
+        fclose($handle);
+
+        if ($result) {
+            echo "Successfully added a CSV line.";
+        }
+
     }
+
+
+
 
     public function prepareDatetime($scheduledDate): string
     {
@@ -47,7 +60,7 @@ class Parser
         return $carbon->format('Y-m-d H:i');
     }
 
-    public function getAddressFields($address): bool|array
+    public function getAddressFields($address)
     {
         if (isset($address) && !empty($address)) {
             $address = preg_replace('#[\s]+#', ' ', trim($address)); //strip more than 1 whitespace
@@ -61,7 +74,9 @@ class Parser
             return ['address' => $address, 'city' => $city, 'state' => $state, 'zip' => $zip];
         } else return false;
     }
+
+
 }
 
 $parser = new Parser();
-$parser -> main();
+$parser->writeToCSV();
